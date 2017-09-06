@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Point To Point</string>
+    <string name="ble_not_supported">Bluetooth Low Energy is not supported on this device</string>
+    <string name="ble_supported">Bluetooth Low Energy is supported on this device</string>
+    <string name="btmesh_uuid">A3990E6b-CC03-4119-9E1D-2D2E8D3D6041</string>
+    <string name="btmesh_rcv_characteristic">A3990E6B-CC03-4119-9E1D-2D2E8D3D6042</string>
+    <string name="btmesh_uuid_charactaristic">A3990E6B-CC03-4119-9E1D-2D2E8D3D6043</string>
+</resources>

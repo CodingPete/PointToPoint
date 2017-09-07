@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import btmesh.pointtopoint.BTLE.Interface.Advertiser;
+import btmesh.pointtopoint.BTLE.Interface.Helpers.IntentBroadcast;
 import btmesh.pointtopoint.BTLE.Interface.Scanner;
 import btmesh.pointtopoint.BTLE.Interface.Server;
 

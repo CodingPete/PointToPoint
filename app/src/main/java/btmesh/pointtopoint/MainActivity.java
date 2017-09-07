@@ -4,8 +4,10 @@ import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +29,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BroadcastReceiver broadcastReceiver = new BluetoothBroadcastReceiver();
+        IntentFilter filter = new IntentFilter("btmesh.pointtopoint.BLUETOOTH_DEVICE_FOUND");
+        this.registerReceiver(broadcastReceiver, filter);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Log.d("mesh:MainActivity", "TEST");

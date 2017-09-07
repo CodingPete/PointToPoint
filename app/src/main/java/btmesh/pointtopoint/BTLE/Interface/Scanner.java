@@ -11,6 +11,7 @@ import android.os.ParcelUuid;
 import android.util.SparseArray;
 
 import btmesh.pointtopoint.BTLE.BTLE;
+import btmesh.pointtopoint.BTLE.Interface.Helpers.IntentBroadcast;
 import btmesh.pointtopoint.R;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class Scanner {
 
     private static String TAG = "mesh:Scanner";
     private Context context;
+    private IntentBroadcast intentBroadcast;
 
     private static BluetoothLeScanner btScanner;
     private static ScanSettings settings;
@@ -29,6 +31,7 @@ public class Scanner {
 
     public Scanner(Context context, BluetoothAdapter btAdapter) {
         this.context = context;
+        this.intentBroadcast = new IntentBroadcast(context);
         btScanner = btAdapter.getBluetoothLeScanner();
 
         filters = new ArrayList<>();
@@ -65,6 +68,8 @@ public class Scanner {
                         uuid,
                         result.getDevice()
                 );
+                intentBroadcast.sendBroadcast(uuid);
+
             } catch (NullPointerException e) {
                 // Scanresult verwerfen
             }

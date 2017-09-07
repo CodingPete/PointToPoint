@@ -17,6 +17,7 @@ import btmesh.pointtopoint.R;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.SynchronousQueue;
 
@@ -32,7 +33,7 @@ public class Transmitter {
     private final Semaphore sendPermit = new Semaphore(1);
 
     // Die Warteschlange der zu sendenden Nachrichten
-    private static Queue<EnqueuedMessage> messageQueue = new SynchronousQueue<>();
+    private static Queue<EnqueuedMessage> messageQueue = new LinkedBlockingQueue<>();
 
     public Transmitter(Context context) {
         this.context = context;

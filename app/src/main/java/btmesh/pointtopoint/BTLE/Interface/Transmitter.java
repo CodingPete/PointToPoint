@@ -11,9 +11,13 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;
 
+import btmesh.pointtopoint.BTLE.Interface.Helpers.EnqueuedMessage;
 import btmesh.pointtopoint.R;
 
+import java.util.List;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.SynchronousQueue;
 
 import btmesh.pointtopoint.BTLE.BTLE;
 
@@ -23,54 +27,34 @@ import btmesh.pointtopoint.BTLE.BTLE;
 public class Transmitter {
 
     private Context context;
-    private byte[] message;
     private final String TAG = "mesh:Transmitter";
-    private BluetoothDevice device;
+
+    // Die Warteschlange der zu sendenden Nachrichten
+    private static Queue<EnqueuedMessage> messageQueue = new SynchronousQueue<>();
 
     public Transmitter(Context context) {
         this.context = context;
     }
 
-    public void send_message(BluetoothDevice device, byte[] message) {
-        Log.d(TAG, "send_message");
-        this.message = message;
-        device.connectGatt(
-                context,
-                true,
-                callback
-        );
+    public static void enqueue(BluetoothDevice device, EnqueuedMessage message) {
+        messageQueue.add(message);
+    }
+
+    private void next() {
+        if(!messageQueue.isEmpty()) {
+            messageQueue.peek()
+                    .getDevice()
+                        .connectGatt(
+                                context,
+                                true,
+                                callback
+                        );
+        }
     }
 
     private BluetoothGattCallback callback = new BluetoothGattCallback() {
 
         private int MAX_MTU = 0;
-        private int packet_number = 0;
-        private int message_max = 0;
-
-        private void send_fragment(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-            byte[] buffer;
-            int bytes_left = message.length - packet_number * MAX_MTU;
-            if (bytes_left >= MAX_MTU) {
-                buffer = new byte[MAX_MTU];
-            } else {
-                buffer = new byte[bytes_left];
-            }
-            System.arraycopy(message, packet_number * MAX_MTU, buffer, 0, buffer.length);
-
-            // Nachricht absetzen.
-            if (!characteristic.setValue(buffer)) {
-                Log.d(TAG, "setValue fail");
-            } else Log.d(TAG, "setCharacteristic success : " + new String(buffer));
-
-            if (!gatt.writeCharacteristic(characteristic)) { //Sending
-                Log.d(TAG, "writeCharacteristic fail");
-            } else {
-                Log.d(TAG, "writeCharacteristc success : " + new String(buffer));
-                Log.d(TAG, "send package number " + packet_number);
-                packet_number++;
-            }
-        }
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -90,10 +74,12 @@ public class Transmitter {
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.d(TAG, "Disconnected");
                     gatt.close();
+                    next();
                     break;
                 default:
                     Log.d(TAG, "Unknown Connection State");
                     gatt.close();
+                    next();
                     break;
             }
         }
@@ -103,28 +89,23 @@ public class Transmitter {
             super.onServicesDiscovered(gatt, status);
             BluetoothGattService service = gatt.getService(UUID.fromString(context.getString(R.string.btmesh_uuid)));
 
-            //Ist eine Naxhricht zu senden?
-            if (message_max > 0) {
-                BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(context.getString(R.string.btmesh_rcv_characteristic)));
-                // Die Characteristic des BT-Mesh Services holen, über die wir Daten schreiben
-                send_fragment(gatt, characteristic);
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(context.getString(R.string.btmesh_rcv_characteristic)));
+            // Die Characteristic des BT-Mesh Services holen, über die wir Daten schreiben
+
+            if(!messageQueue.isEmpty()) {
+                characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                characteristic.setValue(
+                        messageQueue.poll().getMessage()
+                );
+                gatt.writeCharacteristic(characteristic);
             }
+
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicRead(gatt, characteristic, status);
             Log.d(TAG, "onCharacteristicRead");
-
-            // UUID aus der Characteristic des Remotegerätes holen
-            String uuid = new String(characteristic.getValue());
-
-            // UUID und BluetoothDevice in Liste speichern
-            BTLE.deviceAdd(
-                    uuid,
-                    device
-            );
-
             gatt.disconnect();
         }
 
@@ -132,8 +113,9 @@ public class Transmitter {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
             Log.d(TAG, "onCharacteristicWrite");
-            if (packet_number == message_max) gatt.disconnect();
-            else send_fragment(gatt, characteristic);
+
+            // Characteristic wurde geschrieben, wir dürfen die Verbindung beenden
+            gatt.disconnect();
         }
 
         @Override

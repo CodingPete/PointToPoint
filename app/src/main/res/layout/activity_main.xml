@@ -36,7 +36,8 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/uuidHeader"
             android:layout_above="@+id/buttonSend"
-            android:id="@+id/sendToText"/>
+            android:id="@+id/sendToText"
+            android:maxLength="4"/>
         <Button
             android:id="@+id/buttonSend"
             android:layout_width="match_parent"

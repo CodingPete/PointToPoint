@@ -86,7 +86,8 @@ public class Transmitter {
                     break;
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.d(TAG, "Connected");
-                    Log.d(TAG, "Request MTU: " + Boolean.toString(gatt.requestMtu(20)));
+                    //Log.d(TAG, "Request MTU: " + Boolean.toString(gatt.requestMtu(20)));
+                    gatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTING:
                     Log.d(TAG, "Disconnecting");
@@ -177,7 +178,7 @@ public class Transmitter {
             super.onMtuChanged(gatt, mtu, status);
             MAX_MTU = mtu;
             Log.d(TAG, "MAX MTU: " + MAX_MTU);
-            gatt.discoverServices();
+            //gatt.discoverServices();
         }
     };
 

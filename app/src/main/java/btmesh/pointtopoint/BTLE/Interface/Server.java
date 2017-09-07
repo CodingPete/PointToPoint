@@ -12,8 +12,12 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import btmesh.pointtopoint.BTLE.BTLE;
+import btmesh.pointtopoint.BTLE.Interface.Helpers.IntentBroadcast;
 import btmesh.pointtopoint.BTLE.Interface.Service.RcvService;
 import btmesh.pointtopoint.R;
+
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -23,9 +27,11 @@ public class Server {
 
     private BluetoothGattServer server;
     private Context context;
+    private IntentBroadcast intentBroadcast;
 
     public Server(Context context, BluetoothManager btManager) {
         this.context = context;
+        this.intentBroadcast = new IntentBroadcast(context);
         server = btManager.openGattServer(context, callback);
         server.addService(
           new RcvService(
@@ -60,9 +66,12 @@ public class Server {
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
 
-            if(true) {
+            if(offset == 0) {
                 server.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
-                Toast.makeText(context, new String(value), Toast.LENGTH_LONG).show();
+                String senderUUID = Arrays.copyOfRange(value, 0,15).toString();
+                String message = Arrays.copyOfRange(value, 16, 19).toString();
+                Log.d(TAG, message+"\n"+ senderUUID);
+
             } else {
                 server.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, value);
             }

@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +39,7 @@ public class BTLE {
 
     private static final UUID USER_ID = UUID.randomUUID();
 
-    private static Map<String, BluetoothDevice> devices = Collections.synchronizedMap(
+    public static Map<String, BluetoothDevice> devices = Collections.synchronizedMap(
             new HashMap<String, BluetoothDevice>()
     );
 
@@ -127,10 +128,14 @@ public class BTLE {
     }
 
     public static void sendMessage(String uuid, String text) {
+        ByteBuffer bb = ByteBuffer.allocate(20);
+        bb.put(BTLE.getUUIDBytes());
+        bb.put(text.getBytes());
+        bb.flip();
         transmitter.enqueue(
                 new EnqueuedMessage()
                     .setUUID(uuid)
-                    .setMessage(text.getBytes())
+                    .setMessage(bb.array())
                     .setDevice(
                             devices.get(
                                     uuid

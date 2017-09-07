@@ -22,9 +22,10 @@ import java.util.Random;
 import java.util.UUID;
 
 import btmesh.pointtopoint.BTLE.Interface.Advertiser;
-import btmesh.pointtopoint.BTLE.Interface.Helpers.IntentBroadcast;
+import btmesh.pointtopoint.BTLE.Interface.Helpers.EnqueuedMessage;
 import btmesh.pointtopoint.BTLE.Interface.Scanner;
 import btmesh.pointtopoint.BTLE.Interface.Server;
+import btmesh.pointtopoint.BTLE.Interface.Transmitter;
 
 /**
  * Created by peter on 01.08.2017.
@@ -51,6 +52,7 @@ public class BTLE {
     private Advertiser advertiser;
     private Scanner scanner;
     private Server server;
+    private static Transmitter transmitter;
 
     // Scanner Toggle Handler
     private Handler roundRobinHandler = new Handler();
@@ -71,6 +73,10 @@ public class BTLE {
         server = new Server(
                 applicationContext,
                 btManager
+        );
+
+        transmitter = new Transmitter(
+                applicationContext
         );
 
         // Scannerhandler anstoßen
@@ -117,6 +123,19 @@ public class BTLE {
         } else devices.put(
                 uuid,
                 device
+        );
+    }
+
+    public static void sendMessage(String uuid, String text) {
+        transmitter.enqueue(
+                new EnqueuedMessage()
+                    .setUUID(uuid)
+                    .setMessage(text.getBytes())
+                    .setDevice(
+                            devices.get(
+                                    uuid
+                            )
+                    )
         );
     }
 

@@ -63,6 +63,10 @@ public class MainActivity extends Activity {
                 }
         );
 
+        devicesList.setAdapter(
+                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, BTLE.devicesGet())
+        );
+
         // ListView aktualisieren
         final Handler handler = new Handler();
         handler.postDelayed( new Runnable() {

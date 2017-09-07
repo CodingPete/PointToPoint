@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.widget.ArrayAdapter;
 
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
@@ -113,8 +114,6 @@ public class BTLE {
                 uuid,
                 device
         );
-
-
     }
 
     public static List<String> devicesGet() {

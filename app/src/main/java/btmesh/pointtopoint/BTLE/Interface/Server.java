@@ -90,7 +90,7 @@ public class Server {
         @Override
         public void onMtuChanged(BluetoothDevice device, int mtu) {
             super.onMtuChanged(device, mtu);
-            Log.d(TAG, "MTU: " + mtu);
+            Log.d(TAG, "onMtuChanged()" + mtu);
         }
     };
 }

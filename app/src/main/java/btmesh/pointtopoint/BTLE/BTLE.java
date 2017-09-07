@@ -32,6 +32,9 @@ import btmesh.pointtopoint.BTLE.Interface.Server;
 
 public class BTLE {
 
+    public static final String ACTION_FOUND_DEVICE = "btmesh.pointtopoint.BLUETOOTH_DEVICE_FOUND";
+    public static final String EXTRA_DATA_STRING = "btmesh.pointtopoint.DATA";
+
     private static final UUID USER_ID = UUID.randomUUID();
 
     private static Map<String, BluetoothDevice> devices = Collections.synchronizedMap(

@@ -17,22 +17,37 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import btmesh.pointtopoint.BTLE.BTLE;
 
 public class MainActivity extends Activity {
 
     private ListView devicesList;
+    private ArrayAdapter listAdapter;
+    private TextView uuidHeader;
+    private Button sendButton;
+    private EditText editText;
+    private String sendToUUID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BroadcastReceiver broadcastReceiver = new BluetoothBroadcastReceiver();
-        IntentFilter filter = new IntentFilter("btmesh.pointtopoint.BLUETOOTH_DEVICE_FOUND");
-        this.registerReceiver(broadcastReceiver, filter);
+        uuidHeader = (TextView)findViewById(R.id.uuidHeader);
+        sendButton = (Button)findViewById(R.id.buttonSend);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BTLE.sendMessage(sendToUUID, editText.getText().toString());
+            }
+        });
+        editText = (EditText)findViewById(R.id.sendToText);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Log.d("mesh:MainActivity", "TEST");
@@ -64,28 +79,28 @@ public class MainActivity extends Activity {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                        setSendContent((String)parent.getItemAtPosition(position));
                     }
                 }
         );
 
-        devicesList.setAdapter(
-                new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, BTLE.devicesGet())
-        );
+        listAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, BTLE.devicesGet());
+        devicesList.setAdapter(listAdapter);
 
         // ListView aktualisieren
-        final Handler handler = new Handler();
-        handler.postDelayed( new Runnable() {
-
+        BroadcastReceiver br = new BroadcastReceiver() {
             @Override
-            public void run() {
-                devicesList.setAdapter(
-                        new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, BTLE.devicesGet())
-                );
-                handler.postDelayed( this, 1 * 1000 );
+            public void onReceive(Context context, Intent intent) {
+                switch(intent.getAction()){
+                    case BTLE.ACTION_FOUND_DEVICE:
+                        listAdapter.clear();
+                        listAdapter.addAll(BTLE.devicesGet());
+                        break;
+                }
             }
-        }, 1 * 1000 );
-
+        };
+        IntentFilter filter = new IntentFilter(BTLE.ACTION_FOUND_DEVICE);
+        this.registerReceiver(br, filter);
     }
 
     private boolean check_btle_support() {
@@ -102,5 +117,10 @@ public class MainActivity extends Activity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 42);
         }
+    }
+
+    private void setSendContent(String uuid){
+        sendToUUID = uuid;
+        uuidHeader.setText(uuid);
     }
 }

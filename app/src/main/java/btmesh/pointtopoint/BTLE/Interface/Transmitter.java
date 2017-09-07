@@ -50,12 +50,10 @@ public class Transmitter {
     }
 
     private void next() {
-        try {
-            sendPermit.acquire();
             if(!messageQueue.isEmpty()) {
 
                 // Wenn die Nachricht im Rahmen der MTU liegt
-                if(messageQueue.peek().getMessage().length == 20) {
+                if(messageQueue.peek().getMessage().length <= 20) {
                     // ... Versendung einleiten
                     messageQueue.peek()
                             .getDevice()
@@ -72,10 +70,6 @@ public class Transmitter {
                 }
 
             }
-            sendPermit.release();
-        } catch (InterruptedException e) {
-            // Tunix
-        }
     }
 
     private BluetoothGattCallback callback = new BluetoothGattCallback() {

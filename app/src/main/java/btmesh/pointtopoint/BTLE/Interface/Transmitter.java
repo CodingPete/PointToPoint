@@ -17,6 +17,7 @@ import btmesh.pointtopoint.R;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.SynchronousQueue;
 
 import btmesh.pointtopoint.BTLE.BTLE;
@@ -28,6 +29,7 @@ public class Transmitter {
 
     private Context context;
     private final String TAG = "mesh:Transmitter";
+    private final Semaphore sendPermit = new Semaphore(1);
 
     // Die Warteschlange der zu sendenden Nachrichten
     private static Queue<EnqueuedMessage> messageQueue = new SynchronousQueue<>();
@@ -36,19 +38,42 @@ public class Transmitter {
         this.context = context;
     }
 
-    public static void enqueue(BluetoothDevice device, EnqueuedMessage message) {
-        messageQueue.add(message);
+    public void enqueue(EnqueuedMessage message) {
+
+        if(messageQueue.isEmpty()) {
+            // ... unser Paket anhängen
+            messageQueue.add(message);
+            next();
+        } else messageQueue.add(message);
+
     }
 
     private void next() {
-        if(!messageQueue.isEmpty()) {
-            messageQueue.peek()
-                    .getDevice()
-                        .connectGatt(
-                                context,
-                                true,
-                                callback
-                        );
+        try {
+            sendPermit.acquire();
+            if(!messageQueue.isEmpty()) {
+
+                // Wenn die Nachricht im Rahmen der MTU liegt
+                if(messageQueue.peek().getMessage().length == 20) {
+                    // ... Versendung einleiten
+                    messageQueue.peek()
+                            .getDevice()
+                            .connectGatt(
+                                    context,
+                                    true,
+                                    callback
+                            );
+                } else {
+                    // ... ansonsten Paket entfernen
+                    messageQueue.remove();
+                    // ... und zum nächsten übergehen
+                    next();
+                }
+
+            }
+            sendPermit.release();
+        } catch (InterruptedException e) {
+            // Tunix
         }
     }
 
@@ -87,18 +112,19 @@ public class Transmitter {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
+
+            // Den Service holen, in der unsere Characteristic steht
             BluetoothGattService service = gatt.getService(UUID.fromString(context.getString(R.string.btmesh_uuid)));
 
-            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(context.getString(R.string.btmesh_rcv_characteristic)));
             // Die Characteristic des BT-Mesh Services holen, über die wir Daten schreiben
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(context.getString(R.string.btmesh_rcv_characteristic)));
 
-            if(!messageQueue.isEmpty()) {
-                characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-                characteristic.setValue(
-                        messageQueue.poll().getMessage()
-                );
-                gatt.writeCharacteristic(characteristic);
-            }
+            characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+            characteristic.setValue(
+                    messageQueue.poll().getMessage()
+            );
+            gatt.writeCharacteristic(characteristic);
+
 
         }
 

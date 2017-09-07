@@ -10,6 +10,8 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
+
 import btmesh.pointtopoint.BTLE.Interface.Service.RcvService;
 import btmesh.pointtopoint.R;
 import java.util.UUID;
@@ -60,6 +62,7 @@ public class Server {
 
             if(true) {
                 server.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
+                Toast.makeText(context, new String(value), Toast.LENGTH_LONG).show();
             } else {
                 server.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, value);
             }

@@ -38,10 +38,10 @@ public class BTLE {
     public static final String ACTION_FOUND_DEVICE = "btmesh.pointtopoint.BLUETOOTH_DEVICE_FOUND";
     public static final String EXTRA_DATA_STRING = "btmesh.pointtopoint.DATA";
 
-    private static final UUID USER_ID = UUID.randomUUID();
+    public static final UUID USER_ID = UUID.randomUUID();
 
-    public static Map<String, BluetoothDevice> devices = Collections.synchronizedMap(
-            new HashMap<String, BluetoothDevice>()
+    public static Map<UUID, BluetoothDevice> devices = Collections.synchronizedMap(
+            new HashMap<UUID, BluetoothDevice>()
     );
 
     private final String TAG = "mesh:BTLE";
@@ -105,7 +105,7 @@ public class BTLE {
         );
     }
 
-    public static void deviceAdd(String uuid, BluetoothDevice device) {
+    public static void deviceAdd(UUID uuid, BluetoothDevice device) {
 
         // Wenn zu dieser UUID bereits ein Gerät gespeichert ist
         if (devices.containsKey(uuid)) {
@@ -128,9 +128,11 @@ public class BTLE {
         );
     }
 
-    public static void sendMessage(String uuid, String text) {
+    public static void sendMessage(UUID uuid, String text) {
         ByteBuffer bb = ByteBuffer.allocate(20);
-        bb.put(BTLE.getUUIDBytes());
+        bb.put(BTLE.getUUIDBytes(
+                uuid
+        ));
         bb.put(text.getBytes());
         bb.flip();
         transmitter.enqueue(
@@ -147,22 +149,18 @@ public class BTLE {
 
     public static List<RowItem> devicesGet() {
         List<RowItem> rowItems = new ArrayList<RowItem>();
-        for(Map.Entry<String, BluetoothDevice> result : devices.entrySet()) {
-            RowItem item = new RowItem(result.getKey(), result.getValue().getAddress());
+        for(Map.Entry<UUID, BluetoothDevice> result : devices.entrySet()) {
+            RowItem item = new RowItem(result.getKey().toString(), result.getValue().getAddress());
             rowItems.add(item);
         }
 
         return rowItems;
     }
 
-    public static String getUUIDString() {
-        return USER_ID.toString();
-    }
-
-    public static byte[] getUUIDBytes() {
+    public static byte[] getUUIDBytes(UUID uuid) {
         ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-        bb.putLong(USER_ID.getMostSignificantBits());
-        bb.putLong(USER_ID.getLeastSignificantBits());
+        bb.putLong(uuid.getMostSignificantBits());
+        bb.putLong(uuid.getLeastSignificantBits());
         bb.flip();
         return bb.array();
     }

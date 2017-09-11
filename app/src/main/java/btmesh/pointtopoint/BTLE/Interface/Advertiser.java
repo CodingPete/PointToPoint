@@ -42,7 +42,7 @@ public class Advertiser {
                 .addServiceData(puuid, "data".getBytes(Charset.forName("UTF-8")))
                 .build();
         scanResponse = new AdvertiseData.Builder()
-                .addManufacturerData(1, BTLE.getUUIDBytes())
+                .addManufacturerData(1, BTLE.getUUIDBytes(BTLE.USER_ID))
                 .build();
     }
 

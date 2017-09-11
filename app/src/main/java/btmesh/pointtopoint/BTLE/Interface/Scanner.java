@@ -64,14 +64,12 @@ public class Scanner {
             super.onScanResult(callbackType, result);
             try {
                 // Die UUID des Gegenübers ist in der ScanResponse enthalten
-                String uuid = BTLE.parseUUIDfromBytes(
-                        result.getScanRecord().getManufacturerSpecificData(1)
-                ).toString();
+                UUID uuid = BTLE.parseUUIDfromBytes((result.getScanRecord().getManufacturerSpecificData(1)));
                 BTLE.deviceAdd(
                         uuid,
                         result.getDevice()
                 );
-                intentBroadcast.sendBroadcast(uuid);
+                intentBroadcast.sendBroadcast(uuid.toString());
 
             } catch (NullPointerException e) {
                 // Scanresult verwerfen

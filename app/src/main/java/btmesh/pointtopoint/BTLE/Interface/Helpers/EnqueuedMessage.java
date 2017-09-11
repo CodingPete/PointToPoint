@@ -2,22 +2,24 @@ package btmesh.pointtopoint.BTLE.Interface.Helpers;
 
 import android.bluetooth.BluetoothDevice;
 
+import java.util.UUID;
+
 /**
  * Created by peter on 07.09.2017.
  */
 
 public class EnqueuedMessage {
-    private String UUID;
+    private UUID uuid;
     private BluetoothDevice device;
     private byte[] message;
 
-    public EnqueuedMessage setUUID(String uuid) {
-        this.UUID = uuid;
+    public EnqueuedMessage setUUID(UUID uuid) {
+        this.uuid = uuid;
         return this;
     }
 
-    public String getUUID() {
-        return this.UUID;
+    public UUID getUUID() {
+        return this.uuid;
     }
 
     public EnqueuedMessage setDevice(BluetoothDevice device) {

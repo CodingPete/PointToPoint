@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.ArrayAdapter;
@@ -27,6 +28,7 @@ import btmesh.pointtopoint.BTLE.Interface.Helpers.EnqueuedMessage;
 import btmesh.pointtopoint.BTLE.Interface.Scanner;
 import btmesh.pointtopoint.BTLE.Interface.Server;
 import btmesh.pointtopoint.BTLE.Interface.Transmitter;
+import btmesh.pointtopoint.R;
 import btmesh.pointtopoint.RowItem;
 
 /**
@@ -38,7 +40,7 @@ public class BTLE {
     public static final String ACTION_FOUND_DEVICE = "btmesh.pointtopoint.BLUETOOTH_DEVICE_FOUND";
     public static final String EXTRA_DATA_STRING = "btmesh.pointtopoint.DATA";
 
-    public static final UUID USER_ID = UUID.randomUUID();
+    public static UUID USER_ID;
 
     public static Map<UUID, BluetoothDevice> devices = Collections.synchronizedMap(
             new HashMap<UUID, BluetoothDevice>()
@@ -60,6 +62,15 @@ public class BTLE {
     private Handler roundRobinHandler = new Handler();
 
     public BTLE(Context applicationContext, BluetoothAdapter btAdapter, BluetoothManager btManager) {
+
+        SharedPreferences sharedPref = applicationContext.getSharedPreferences(
+                applicationContext.getString(R.string.btmesh_shared_preferences), Context.MODE_PRIVATE);
+
+        USER_ID = UUID.fromString(sharedPref.getString(applicationContext.getString(R.string.saved_uuid), UUID.randomUUID().toString()));
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(applicationContext.getString(R.string.saved_uuid), USER_ID.toString());
+        editor.apply();
 
         advertiser = new Advertiser(
                 applicationContext,

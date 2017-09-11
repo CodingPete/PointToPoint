@@ -24,6 +24,7 @@ public class Scanner {
     private static String TAG = "mesh:Scanner";
     private Context context;
     private IntentBroadcast intentBroadcast;
+    private BluetoothAdapter btAdapter;
 
     private static BluetoothLeScanner btScanner;
     private static ScanSettings settings;
@@ -31,6 +32,7 @@ public class Scanner {
 
     public Scanner(Context context, BluetoothAdapter btAdapter) {
         this.context = context;
+        this.btAdapter = btAdapter;
         this.intentBroadcast = new IntentBroadcast(context);
         btScanner = btAdapter.getBluetoothLeScanner();
 
@@ -48,7 +50,8 @@ public class Scanner {
     }
 
     public void start() {
-        btScanner.startScan(filters, settings, scanCallback);
+        if(btAdapter.isEnabled())
+            btScanner.startScan(filters, settings, scanCallback);
     }
 
     public void stop() {

@@ -24,6 +24,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import btmesh.pointtopoint.BTLE.BTLE;
 
 public class MainActivity extends Activity {
@@ -77,17 +80,18 @@ public class MainActivity extends Activity {
             }
         }
 
+
         devicesList = (ListView) findViewById(R.id.devicesList);
         devicesList.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        setSendContent((String)parent.getItemAtPosition(position));
+                        setSendContent(((RowItem)parent.getItemAtPosition(position)).getUuid());
                     }
                 }
         );
 
-        listAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, BTLE.devicesGet());
+        listAdapter = new CustomList(getApplicationContext(), R.layout.list_item, BTLE.devicesGet());
         devicesList.setAdapter(listAdapter);
 
         // ListView aktualisieren

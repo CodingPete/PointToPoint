@@ -27,6 +27,7 @@ import btmesh.pointtopoint.BTLE.Interface.Helpers.EnqueuedMessage;
 import btmesh.pointtopoint.BTLE.Interface.Scanner;
 import btmesh.pointtopoint.BTLE.Interface.Server;
 import btmesh.pointtopoint.BTLE.Interface.Transmitter;
+import btmesh.pointtopoint.RowItem;
 
 /**
  * Created by peter on 01.08.2017.
@@ -144,13 +145,14 @@ public class BTLE {
         );
     }
 
-    public static List<String> devicesGet() {
-        ArrayList<String> uuids = new ArrayList<>();
+    public static List<RowItem> devicesGet() {
+        List<RowItem> rowItems = new ArrayList<RowItem>();
         for(Map.Entry<String, BluetoothDevice> result : devices.entrySet()) {
-            uuids.add(result.getKey());
+            RowItem item = new RowItem(result.getKey(), result.getValue().getAddress());
+            rowItems.add(item);
         }
 
-        return uuids;
+        return rowItems;
     }
 
     public static String getUUIDString() {
@@ -158,10 +160,9 @@ public class BTLE {
     }
 
     public static byte[] getUUIDBytes() {
-        UUID uuid = UUID.randomUUID();
         ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-        bb.putLong(uuid.getMostSignificantBits());
-        bb.putLong(uuid.getLeastSignificantBits());
+        bb.putLong(USER_ID.getMostSignificantBits());
+        bb.putLong(USER_ID.getLeastSignificantBits());
         bb.flip();
         return bb.array();
     }

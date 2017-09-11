@@ -68,8 +68,8 @@ public class Server {
 
             if(offset == 0) {
                 server.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
-                String senderUUID = Arrays.copyOfRange(value, 0,15).toString();
-                String message = Arrays.copyOfRange(value, 16, 19).toString();
+                String senderUUID = BTLE.parseUUIDfromBytes(Arrays.copyOfRange(value, 0,16)).toString();
+                String message = new String(Arrays.copyOfRange(value, 16, 20));
                 Log.d(TAG, message+"\n"+ senderUUID);
 
             } else {

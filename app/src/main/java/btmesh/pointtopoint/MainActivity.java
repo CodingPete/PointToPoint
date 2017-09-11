@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 import btmesh.pointtopoint.BTLE.BTLE;
+import btmesh.pointtopoint.BTLE.Interface.Protocol.PingPongProtocol;
 
 public class MainActivity extends Activity {
 
@@ -77,7 +78,12 @@ public class MainActivity extends Activity {
 
             // Wenn Bluetooth eingeschaltet ...
             if (btAdapter.isEnabled()) {
-                new BTLE(getApplicationContext(), btAdapter, (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE));
+                new BTLE(
+                    getApplicationContext(),
+                    btAdapter,
+                    (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE),
+                    new PingPongProtocol()
+                );
             }
         }
 

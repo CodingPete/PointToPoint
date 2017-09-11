@@ -1,21 +1,14 @@
 package btmesh.pointtopoint.BTLE;
 
-import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.os.IBinder;
-import android.widget.ArrayAdapter;
 
 import java.nio.ByteBuffer;
-import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +17,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import btmesh.pointtopoint.BTLE.Interface.Advertiser;
+import btmesh.pointtopoint.BTLE.Interface.Protocol.BTLEProtocol;
 import btmesh.pointtopoint.BTLE.Interface.Helpers.EnqueuedMessage;
 import btmesh.pointtopoint.BTLE.Interface.Scanner;
 import btmesh.pointtopoint.BTLE.Interface.Server;
@@ -53,15 +47,18 @@ public class BTLE {
 
     private int WINDOW = 0;
 
+    public static BTLEProtocol protocol;
     private Advertiser advertiser;
     private Scanner scanner;
     private Server server;
-    private static Transmitter transmitter;
+    public static Transmitter transmitter;
 
     // Scanner Toggle Handler
     private Handler roundRobinHandler = new Handler();
 
-    public BTLE(Context applicationContext, BluetoothAdapter btAdapter, BluetoothManager btManager) {
+    public BTLE(Context applicationContext, BluetoothAdapter btAdapter, BluetoothManager btManager, BTLEProtocol protocol) {
+
+        BTLE.protocol = protocol;
 
         SharedPreferences sharedPref = applicationContext.getSharedPreferences(
                 applicationContext.getString(R.string.btmesh_shared_preferences), Context.MODE_PRIVATE);
@@ -140,21 +137,9 @@ public class BTLE {
     }
 
     public static void sendMessage(UUID uuid, String text) {
-        ByteBuffer bb = ByteBuffer.allocate(20);
-        bb.put(BTLE.getUUIDBytes(
-                uuid
-        ));
-        bb.put(text.getBytes());
-        bb.flip();
-        transmitter.enqueue(
-                new EnqueuedMessage()
-                    .setUUID(uuid)
-                    .setMessage(bb.array())
-                    .setDevice(
-                            devices.get(
-                                    uuid
-                            )
-                    )
+        protocol.transmit(
+                uuid,
+                text.getBytes()
         );
     }
 

@@ -71,7 +71,10 @@ public class Server {
                 String senderUUID = BTLE.parseUUIDfromBytes(Arrays.copyOfRange(value, 0,16)).toString();
                 String message = new String(Arrays.copyOfRange(value, 16, 20));
                 Log.d(TAG, message+"\n"+ senderUUID);
-
+                BTLE.protocol.receive(
+                        device,
+                        value
+                );
             } else {
                 server.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, value);
             }

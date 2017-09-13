@@ -24,7 +24,7 @@ public class PingPongProtocol implements BTLEProtocol {
         // Die Übertragene Payload holen
         String value = new String(Arrays.copyOfRange(message, 16, 20));
 
-        // Wenn die Value noch nicht fertig herunter gezählt ist, ...
+        // War es ein Ping? Dann antworten wir mit Pong
         if(value.equals("Ping")) {
             transmit(
                     sender,

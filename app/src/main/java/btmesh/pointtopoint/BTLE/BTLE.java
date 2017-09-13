@@ -31,6 +31,8 @@ import btmesh.pointtopoint.RowItem;
 
 public class BTLE {
 
+    private static BTLE instance;
+
     public static final String ACTION_FOUND_DEVICE = "btmesh.pointtopoint.BLUETOOTH_DEVICE_FOUND";
     public static final String EXTRA_DATA_STRING = "btmesh.pointtopoint.DATA";
 
@@ -56,7 +58,12 @@ public class BTLE {
     // Scanner Toggle Handler
     private Handler roundRobinHandler = new Handler();
 
-    public BTLE(Context applicationContext, BluetoothAdapter btAdapter, BluetoothManager btManager, BTLEProtocol protocol) {
+    public static BTLE getInstance(Context applicationContext, BluetoothAdapter btAdapter, BluetoothManager btManager, BTLEProtocol protocol) {
+        if(instance == null) return instance = new BTLE(applicationContext, btAdapter, btManager, protocol);
+        else return instance;
+    }
+
+    private BTLE(Context applicationContext, BluetoothAdapter btAdapter, BluetoothManager btManager, BTLEProtocol protocol) {
 
         BTLE.protocol = protocol;
 

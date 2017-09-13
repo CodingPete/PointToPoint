@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
 
             // Wenn Bluetooth eingeschaltet ...
             if (btAdapter.isEnabled()) {
-                new BTLE(
+                BTLE.getInstance(
                     getApplicationContext(),
                     btAdapter,
                     (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE),
